@@ -1,117 +1,117 @@
-# Cameras Viewer - Documentación del Proyecto
+# Cameras Viewer - Project Documentation
 
-## Descripción
+## Description
 
-Interfaz web local para visualizar múltiples cámaras de seguridad RTSP simultáneamente. El sistema utiliza go2rtc para convertir streams RTSP a formatos compatibles con navegadores web.
+Local web interface for viewing multiple RTSP security cameras simultaneously. The system uses go2rtc to convert RTSP streams into formats that browsers can play.
 
-## Arquitectura
+## Architecture
 
 ```
-Cámaras RTSP → go2rtc (Docker) → Navegador Web
+RTSP Cameras → go2rtc (Docker) → Web Browser
                    ↓
               nginx (Docker)
                    ↓
-        Servicio de preferencias (Docker)
+        Preferences service (Docker)
 ```
 
-- **go2rtc**: Convierte streams RTSP a WebRTC/MSE/MP4/HLS
-- **nginx**: Sirve la interfaz web estática
-- **Frontend**: HTML/CSS/JS vanilla con iframes embebidos de go2rtc
-- **Servicio de preferencias**: API HTTP Node.js que guarda `layout`, asignaciones y cámaras habilitadas en `data/preferences.json`
+- **go2rtc**: Converts RTSP streams to WebRTC/MSE/MP4/HLS.
+- **nginx**: Serves the static web interface.
+- **Frontend**: Vanilla HTML/CSS/JS with go2rtc iframes embedded.
+- **Preferences service**: Node.js HTTP API that stores `layout`, assignments, and enabled cameras in `data/preferences.json`.
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 cameras-viewer/
-├── .env                   # Credenciales RTSP (no versionado)
-├── .env.example          # Plantilla de configuración
-├── .gitignore            # Ignora .env y archivos del sistema
-├── docker-compose.yml    # Servicios: go2rtc + nginx + preferencias
-├── go2rtc.yaml          # Configuración de streams
-├── entrypoint.sh        # Script para generar go2rtc.yaml desde .env
+├── .env                   # RTSP credentials (untracked)
+├── .env.example           # Configuration template
+├── .gitignore             # Ignores .env and system files
+├── docker-compose.yml     # Services: go2rtc + nginx + preferences
+├── go2rtc.yaml            # Stream configuration
+├── entrypoint.sh          # Script to generate go2rtc.yaml from .env
 ├── data/
-│   └── preferences.json # Archivo persistente con layout/cámaras
+│   └── preferences.json   # Persistent file storing layout/cameras
 ├── preferences-service/
-│   └── server.js        # API HTTP para cargar/guardar preferencias
+│   └── server.js          # HTTP API for loading/saving preferences
 └── web/
-    ├── index.html       # Interfaz principal
-    ├── styles.css       # Estilos (tema oscuro)
-    └── app.js           # Lógica UI
+    ├── index.html         # Main interface
+    ├── styles.css         # Styles (dark theme)
+    └── app.js             # UI logic
 ```
 
-## Configuración
+## Configuration
 
-### Archivo .env
+### .env file
 
-Define las URLs RTSP de las cámaras:
+Defines the RTSP URLs for the cameras:
 
 ```env
-ROOM_CAMERA_URL=rtsp://usuario:contraseña@ip:puerto/stream1
-DOOR_CAMERA_URL=rtsp://usuario:contraseña@ip:puerto/
+ROOM_CAMERA_URL=rtsp://user:password@ip:port/stream1
+DOOR_CAMERA_URL=rtsp://user:password@ip:port/
 ...
 ```
 
 ### go2rtc.yaml
 
-Configuración de streams que go2rtc utiliza. Se genera automáticamente desde `.env` si se usa el enfoque de variables separadas (ver `entrypoint.sh`). En el proyecto actual se usa directamente con variables de entorno.
+Stream configuration consumed by go2rtc. It is generated automatically from `.env` if you use the split-variable approach (see `entrypoint.sh`). The current project uses environment variables directly.
 
-## Ejecución
+## Running
 
-### Iniciar los servicios
+### Start the services
 
 ```bash
 docker-compose up -d
 ```
 
-### Acceder a la interfaz
+### Access the interface
 
-- Interfaz principal: http://localhost:9876
-- API de go2rtc: http://localhost:1984
-- WebUI de go2rtc: http://localhost:1984
-- API de preferencias: http://localhost:9191/preferences
+- Main interface: http://localhost:9876
+- go2rtc API: http://localhost:1984
+- go2rtc WebUI: http://localhost:1984
+- Preferences API: http://localhost:9191/preferences
 
-### Detener los servicios
+### Stop the services
 
 ```bash
 docker-compose down
 ```
 
-## Funcionalidades
+## Features
 
 ### Layouts
 
-- **1 cámara**: Vista individual
-- **2 cámaras**: Vista dividida horizontal
-- **4 cámaras**: Grid 2x2 (por defecto)
-- **6 cámaras**: Grid 3x2
-- **7 cámaras**: Grid 4x2 adaptativo
+- **1 camera**: Single view
+- **2 cameras**: Horizontal split view
+- **4 cameras**: 2x2 grid (default)
+- **6 cameras**: 3x2 grid
+- **7 cameras**: Adaptive 4x2 grid
 
-### Controles
+### Controls
 
-- **Toggles de vídeo**: Switches en el header para activar/desactivar cámaras individuales
-- **Cambio de cámara**: Botón "Cambiar" en la esquina superior derecha de cada slot
-- **Persistencia**: Las preferencias de layout y cámaras visibles se guardan en localStorage
-- **Controles de reproducción**: Integrados en cada iframe (volumen, fullscreen, picture-in-picture)
+- **Video toggles**: Switches in the header to enable/disable individual cameras
+- **Change camera**: "Change" button in the upper-right corner of each slot
+- **Persistence**: Layout and visible cameras are stored in localStorage
+- **Playback controls**: Built into each iframe (volume, fullscreen, picture-in-picture)
 
-## Detalles Técnicos
+## Technical Details
 
-### Player Embebido
+### Embedded player
 
-Se usa el player embebido de go2rtc via iframes:
+The embedded go2rtc player is used via iframes:
 
 ```javascript
 iframe.src = `${GO2RTC_URL}/stream.html?src=${cameraId}&mode=webrtc,mse,mp4,hls`;
 ```
 
-**Orden de prioridad de protocolos**:
-1. WebRTC (baja latencia)
+**Protocol priority order**:
+1. WebRTC (low latency)
 2. MSE (Media Source Extensions)
 3. MP4
 4. HLS
 
-### Indicador "MS"
+### "MS" indicator
 
-El indicador "MS" (MSE) que aparece en las cámaras indica el modo de conexión activo. Se oculta mediante CSS:
+The "MS" (MSE) badge that appears on the cameras indicates the active connection mode. It is hidden using CSS:
 
 ```css
 .camera-slot iframe {
@@ -120,128 +120,128 @@ El indicador "MS" (MSE) que aparece en las cámaras indica el modo de conexión 
 }
 ```
 
-### Persistencia de Preferencias
+### Preference persistence
 
-Las preferencias se guardan en `data/preferences.json` mediante el servicio Node.js expuesto en `http://localhost:9191/preferences`. La interfaz lee los valores con `GET /preferences` y los guarda con `POST /preferences`, por lo que se preservan incluso en navegación privada o al limpiar el navegador.
+Preferences are stored in `data/preferences.json` via the Node.js service exposed at `http://localhost:9191/preferences`. The interface reads values with `GET /preferences` and saves them with `POST /preferences`, so the data survives private browsing sessions or clearing the browser.
 
-### Diseño Visual
+### Visual design
 
-El sistema usa un tema **Dark Cyber / MCP-inspired** moderno con:
+The system uses a sleek **Dark Cyber / MCP-inspired** theme with:
 
-- **Título Principal**: Tipografía audaz con degradado de blanco a azul eléctrico, efecto de brillo (`drop-shadow`) e indicador visual "REC" animado (pulso rojo).
-- **Colores base**: Paleta oscura profunda (#050a14, #0a192f) con gradientes radiales.
-- **Bordes redondeados**: 16px en los slots de cámara para un look más orgánico y moderno.
-- **Espaciado**: 1.5rem entre cámaras para una cuadrícula más aireada y profesional.
-- **Toggles "Tech"**: Switches redondeados con profundidad visual (inset shadows) y brillo azul eléctrico sutil.
-- **Selector de Layout**: Desplegable personalizado con flecha cian neón, fondo con desenfoque (glassmorphism) y marcador vertical técnico.
-- **Interacción**: Efectos de elevación y brillo (glow) púrpura al pasar el ratón por los slots de cámara.
-- **Selector**: Modal con fondo desenfocado (glassmorphism) y backdrop para mejorar la concentración.
+- **Main title**: Bold typeface with a white-to-electric-blue gradient, glow effect (`drop-shadow`), and animated "REC" indicator (red pulse).
+- **Base colors**: Deep dark palette (#050a14, #0a192f) with radial gradients.
+- **Rounded corners**: 16px on camera slots for a more organic, modern look.
+- **Spacing**: 1.5rem between cameras for an airier, more professional grid.
+- **"Tech" toggles**: Rounded switches with depth (inset shadows) and a subtle electric-blue glow.
+- **Layout selector**: Custom dropdown with neon-cyan arrow, blurred background (glassmorphism), and technical vertical marker.
+- **Interaction**: Elevation and purple-glow hover effects on camera slots.
+- **Picker**: Modal with blurred background (glassmorphism) and backdrop to aid focus.
 
-## Problemas Conocidos y Soluciones
+## Known Issues and Fixes
 
-### WebRTC no funciona en Docker macOS
+### WebRTC does not work on Docker macOS
 
-**Problema**: `network_mode: host` no funciona en Docker Desktop para macOS. Go2rtc corre detrás del bridge interno de Docker y cuando responde la negociación ICE, anuncia candidatos con IPs internas (`192.168.65.x`) que el navegador no puede alcanzar, causando que el player caiga a MSE/MP4 con latencia.
+**Issue**: `network_mode: host` does not work on Docker Desktop for macOS. Go2rtc runs behind Docker's internal bridge and advertises ICE candidates with internal IPs (`192.168.65.x`) that the browser cannot reach, pushing the player down to MSE/MP4 with latency.
 
-**Solución implementada**:
-1. Configurar candidatos ICE explícitos en `go2rtc.yaml`:
+**Implemented fix**:
+1. Configure explicit ICE candidates in `go2rtc.yaml`:
    ```yaml
    webrtc:
      listen: ":8555/tcp"
      candidates:
        - 192.168.1.100:8555  # Replace with your LAN IP
-       - 127.0.0.1:8555        # localhost para acceso local
+       - 127.0.0.1:8555      # localhost for local access
        - stun:8555
    ```
-2. Exponer puertos TCP y UDP en `docker-compose.yml`:
+2. Expose TCP and UDP ports in `docker-compose.yml`:
    ```yaml
    ports:
      - "8555:8555/tcp"
      - "8555:8555/udp"
    ```
-3. **Transcodificar cámaras H.265 con audio AAC**: WebRTC no soporta H.265 (HEVC) ni maneja bien el audio AAC. Para las cámaras Ezviz (H.265 + AAC), transcodificar tanto video como audio:
+3. **Transcode H.265 cameras with AAC audio**: WebRTC does not support H.265 (HEVC) and struggles with AAC audio. For Ezviz cameras (H.265 + AAC), transcode both video and audio:
    ```yaml
    door:
      - ffmpeg:rtsp://admin:PASSWORD@IP/#video=h264#audio=opus
    bedroom_out:
      - ffmpeg:rtsp://admin:PASSWORD@IP/#video=h264#audio=opus
    ```
-4. Reiniciar con `docker-compose restart go2rtc` y refrescar el navegador.
+4. Restart with `docker-compose restart go2rtc` and refresh the browser.
 
-**Nota**: Las cámaras Tapo (H.264 + PCMA) funcionan con WebRTC sin transcodificación. Solo las cámaras Ezviz (H.265 + AAC) necesitan transcodificación. La transcodificación consume más CPU en el contenedor go2rtc.
+**Note**: Tapo cameras (H.264 + PCMA) work with WebRTC without transcoding. Only Ezviz cameras (H.265 + AAC) need transcoding. Transcoding increases CPU usage in the go2rtc container.
 
-### Firewall bloqueando Docker
+### Firewall blocking Docker
 
-**Problema**: Lulu u otros firewalls de macOS pueden bloquear las conexiones de Docker a la red local.
+**Issue**: Lulu or other macOS firewalls can block Docker's connections to the local network.
 
-**Solución**: Dar permisos al firewall para permitir conexiones de Docker.
+**Solution**: Allow Docker through the firewall.
 
-### Cámaras no accesibles
+### Cameras not reachable
 
-**Problema**: Las cámaras deben estar en la misma red que el host.
+**Issue**: Cameras must be on the same network as the host.
 
-**Verificación**:
+**Verification**:
 ```bash
 ping 192.168.1.xxx
 nc -zv -w2 192.168.1.xxx 554
 ```
 
-### ICE candidates timeout con WebRTC directo
+### ICE candidates timeout with direct WebRTC
 
-**Problema**: Los ICE candidates no se completan correctamente en Docker macOS.
+**Issue**: ICE candidates do not complete properly on Docker macOS.
 
-**Solución**: Usar el player embebido de go2rtc en lugar de implementar WebRTC manualmente.
+**Solution**: Use the embedded go2rtc player instead of implementing WebRTC manually.
 
-## Cámaras Configuradas
+## Configured Cameras
 
-1. **Habitación** (room)
-2. **Puerta** (door)
-3. **Dormitorio ext.** (bedroom_out)
-4. **Cocina** (kitchen)
-5. **Garaje** (garage)
-6. **Pasillo** (hall)
-7. **Comedor** (dining_room)
-8. ~~**Dormitorio** (bedroom)~~ - Desconectada
+1. **Room** (room)
+2. **Door** (door)
+3. **Bedroom ext.** (bedroom_out)
+4. **Kitchen** (kitchen)
+5. **Garage** (garage)
+6. **Hallway** (hall)
+7. **Dining room** (dining_room)
+8. ~~**Bedroom** (bedroom)~~ - Disconnected
 
-## Modificaciones Futuras
+## Future Changes
 
-### Agregar/Quitar Cámaras
+### Add/Remove cameras
 
-1. Actualizar `.env` con la nueva URL RTSP
-2. Actualizar `go2rtc.yaml` con el nuevo stream
-3. Actualizar el array `CAMERAS` en `web/app.js`:
+1. Update `.env` with the new RTSP URL.
+2. Update `go2rtc.yaml` with the new stream.
+3. Update the `CAMERAS` array in `web/app.js`:
 
 ```javascript
 const CAMERAS = [
-  { id: 'camera_id', name: 'Nombre' },
+  { id: 'camera_id', name: 'Name' },
   // ...
 ];
 ```
 
-### Cambiar Puertos
+### Change ports
 
-Editar `docker-compose.yml`:
+Edit `docker-compose.yml`:
 
 ```yaml
 ports:
-  - "8080:80"   # Puerto web
-  - "1984:1984" # Puerto go2rtc
+  - "8080:80"   # Web port
+  - "1984:1984" # go2rtc port
 ```
 
-### Personalizar Estilos
+### Customize styles
 
-Editar `web/styles.css`. El tema actual es **Dark Cyber** optimizado para visualización de alta tecnología.
+Edit `web/styles.css`. The current theme is **Dark Cyber** optimized for high-tech monitoring.
 
-**Colores principales**:
-- Fondo principal: `#050a14` (Cyber Dark)
-- Paneles (Surfaces): `#0a192f` (Deep Navy)
-- Acento Primario: `#00e5ff` (Electric Blue)
-- Acento Secundario: `#64ffda` (Cyan)
-- Acento de Interacción: `#bd34fe` (Purple Glow)
+**Primary colors**:
+- Main background: `#050a14` (Cyber Dark)
+- Panels (surfaces): `#0a192f` (Deep Navy)
+- Primary accent: `#00e5ff` (Electric Blue)
+- Secondary accent: `#64ffda` (Cyan)
+- Interaction accent: `#bd34fe` (Purple Glow)
 
-## Comandos Útiles
+## Useful Commands
 
-### Ver logs
+### View logs
 
 ```bash
 docker-compose logs -f
@@ -249,23 +249,23 @@ docker logs cameras-go2rtc
 docker logs cameras-web
 ```
 
-### Reiniciar servicios
+### Restart services
 
 ```bash
 docker-compose restart
 ```
 
-### Verificar streams en go2rtc
+### Check streams in go2rtc
 
 ```bash
 curl http://localhost:1984/api/streams
 ```
 
-### Restaurar preferencias guardadas
+### Restore saved preferences
 
-Detén los contenedores y elimina/edita `data/preferences.json` para volver a los valores por defecto (layout 4 cámaras, todas habilitadas).
+Stop the containers and delete/edit `data/preferences.json` to revert to the defaults (4-camera layout, all enabled).
 
-## Referencias
+## References
 
 - [go2rtc GitHub](https://github.com/AlexxIT/go2rtc)
 - [go2rtc Documentation](https://github.com/AlexxIT/go2rtc/wiki)

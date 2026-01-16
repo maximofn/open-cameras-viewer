@@ -1,55 +1,55 @@
 # Cameras Viewer
 
-Interfaz web local para monitorear múltiples cámaras RTSP a la vez usando [go2rtc](https://github.com/AlexxIT/go2rtc). El stack corre en Docker e incluye un servicio de preferencias para recordar layout, cámaras visibles y asignaciones incluso al usar ventanas privadas del navegador.
+Local web interface for monitoring multiple RTSP cameras at once using [go2rtc](https://github.com/AlexxIT/go2rtc). The stack runs in Docker and ships with a preferences service that remembers the layout, visible cameras, and assignments even when you use private browser windows.
 
-## Arquitectura
+## Architecture
 
 ```
-Cámaras RTSP ──▶ go2rtc (Docker) ──▶ Navegador (Brave/Safari/Chrome)
+RTSP Cameras ──▶ go2rtc (Docker) ──▶ Browser (Brave/Safari/Chrome)
                     │
-                    └──▶ nginx (Docker) ──▶ Frontend HTML/CSS/JS
+                    └──▶ nginx (Docker) ──▶ HTML/CSS/JS frontend
                                 │
-                                └──▶ Servicio de preferencias (Node.js)
+                                └──▶ Preferences service (Node.js)
 ```
 
-- **go2rtc** convierte cada stream RTSP en formatos web (WebRTC/MSE/MP4/HLS).
-- **nginx** sirve la SPA (`web/`).
-- **Servicio de preferencias** (`preferences-service/server.js`) expone `GET/POST /preferences` y persiste los datos en `data/preferences.json`.
-- **Frontend** (`web/app.js`) muestra las cámaras dentro de iframes embebidos de go2rtc y consume el API de preferencias.
+- **go2rtc** converts every RTSP stream into web formats (WebRTC/MSE/MP4/HLS).
+- **nginx** serves the SPA (`web/`).
+- **Preferences service** (`preferences-service/server.js`) exposes `GET/POST /preferences` and persists the data in `data/preferences.json`.
+- **Frontend** (`web/app.js`) shows the cameras inside embedded go2rtc iframes and consumes the preferences API.
 
-## Características
+## Features
 
-- Layouts predefinidos: 1, 2, 4, 6 y 7 cámaras.
-- Selector de cámara por slot + toggles individuales para activar/desactivar feeds.
-- Preferencias persistentes fuera del navegador (funciona en modo incógnito).
-- Tema "Dark Cyber" con efectos de glow y glassmorphism.
-- Contenedores gestionados con `docker compose` + script `launch_cameras.sh` que abre Brave y detiene todo al cerrar la ventana.
+- Preset layouts: 1, 2, 4, 6, and 7 cameras.
+- Per-slot camera selector plus individual toggles to enable/disable feeds.
+- Preferences persisted outside the browser (works in incognito).
+- "Dark Cyber" theme with glow and glassmorphism effects.
+- Containers managed with `docker compose` + `launch_cameras.sh`, which launches Brave and stops everything when the window closes.
 
-## Requisitos
+## Requirements
 
-- Docker Desktop (macOS/Linux/Windows) con `docker compose` plugin.
-- Acceso a las cámaras RTSP desde la máquina host.
-- Navegador moderno (Brave recomendado; el script abre Brave automáticamente).
+- Docker Desktop (macOS/Linux/Windows) with the `docker compose` plugin.
+- Host machine with network access to the RTSP cameras.
+- Modern browser (Brave recommended; the script opens Brave automatically).
 
-## Configuración
+## Setup
 
-1. Crea tu `.env` con las URLs RTSP (usa `.env.example` como referencia) y asegúrate de mapear cada cámara en `go2rtc.yaml`.
-2. Ajusta el array `CAMERAS` en `web/app.js` para reflejar los nombres/IDs utilizados.
-3. Opcional: edita los puertos publicados en `docker-compose.yml` (`9876` web, `1984` go2rtc, `9191` preferencias).
+1. Create your `.env` with the RTSP URLs (use `.env.example` as reference) and make sure every camera is mapped in `go2rtc.yaml`.
+2. Adjust the `CAMERAS` array in `web/app.js` to reflect the names/IDs in use.
+3. Optional: edit the published ports in `docker-compose.yml` (`9876` web, `1984` go2rtc, `9191` preferences).
 
-## Ejecución
+## Run
 
 ```bash
 ./launch_cameras.sh
 ```
 
-El script realiza estos pasos:
+The script performs these steps:
 
-1. `docker compose up -d` levanta `go2rtc`, `nginx` y `cameras-preferences`.
-2. Abre Brave en modo incógnito en `http://localhost:9876/`, maximizado en la pantalla principal.
-3. Queda esperando hasta que cierres la pestaña. Al cerrarla, ejecuta `docker compose stop`.
+1. `docker compose up -d` starts `go2rtc`, `nginx`, and `cameras-preferences`.
+2. Opens Brave in incognito mode at `http://localhost:9876/`, maximized on the primary display.
+3. Waits until you close the tab. When you do, it runs `docker compose stop`.
 
-También puedes manejarlo manualmente:
+You can also manage it manually:
 
 ```bash
 docker compose up -d
@@ -62,12 +62,12 @@ docker compose down
 
 - Frontend: `http://localhost:9876`
 - go2rtc API/WebUI: `http://localhost:1984`
-- Servicio de preferencias: `http://localhost:9191/preferences`
+- Preferences service: `http://localhost:9191/preferences`
 
-## Preferencias persistentes
+## Persistent preferences
 
-- Ubicación del archivo: `data/preferences.json` (montado dentro del contenedor Node).
-- Estructura JSON:
+- File location: `data/preferences.json` (mounted inside the Node container).
+- JSON structure:
 
 ```json
 {
@@ -77,29 +77,29 @@ docker compose down
 }
 ```
 
-- El frontend realiza `GET /preferences` al cargar y `POST /preferences` cada vez que modificas layout, toggles o asignaciones.
-- Para restablecer la configuración elimina o edita `data/preferences.json` mientras los contenedores están detenidos.
+- The frontend issues `GET /preferences` on load and `POST /preferences` every time you change the layout, toggles, or assignments.
+- To restore the defaults, delete or edit `data/preferences.json` while the containers are stopped.
 
-## Problemas comunes
+## Common issues
 
-| Problema | Solución |
+| Issue | Fix |
 | --- | --- |
-| Brave no abre o no se posiciona | Consiente a Terminal/osascript en *Privacy → Accessibility* y ejecuta `./launch_cameras.sh` de nuevo. |
-| Streams no cargan | Verifica conectividad a la IP de la cámara (`ping`, `nc -zv host 554`) y revisa `go2rtc.yaml`. |
-| WebRTC cae a MSE en Docker macOS | Los candidatos ICE deben incluir tanto localhost como la IP LAN. En `go2rtc.yaml` configura `webrtc.candidates` con tu IP LAN, `127.0.0.1` y `stun`. En `docker-compose.yml` expón los puertos `8555/tcp` y `8555/udp`. **Importante**: Cámaras con H.265 o audio AAC necesitan transcodificación: usa `ffmpeg:rtsp://URL/#video=h264#audio=opus` en streams. |
-| Preferencias no persisten | Asegúrate de que `cameras-preferences` esté corriendo (`docker compose ps`) y que `data/preferences.json` sea escribible. |
+| Brave does not open or move | Grant Terminal/osascript permissions in *Privacy → Accessibility* and run `./launch_cameras.sh` again. |
+| Streams do not load | Check connectivity to the camera IP (`ping`, `nc -zv host 554`) and review `go2rtc.yaml`. |
+| WebRTC falls back to MSE on Docker macOS | ICE candidates must include both localhost and the LAN IP. In `go2rtc.yaml` configure `webrtc.candidates` with your LAN IP, `127.0.0.1`, and `stun`. In `docker-compose.yml` expose ports `8555/tcp` and `8555/udp`. **Important**: Cameras using H.265 or AAC audio need transcoding—use `ffmpeg:rtsp://URL/#video=h264#audio=opus` streams. |
+| Preferences do not persist | Ensure `cameras-preferences` is running (`docker compose ps`) and `data/preferences.json` is writable. |
 
-## Desarrollo
+## Development
 
-- `web/` contiene HTML/CSS/JS sin frameworks. Puedes recargar la página tras editar archivos; nginx sirve directamente desde el volumen.
-- `preferences-service/server.js` es un servidor Node básico (sin dependencias externas). Reinicia el contenedor si haces cambios en este archivo.
-- `go2rtc.yaml` describe cada stream RTSP (consulta la [documentación oficial](https://github.com/AlexxIT/go2rtc/wiki)).
+- `web/` contains framework-free HTML/CSS/JS. Reload the page after editing; nginx serves directly from the volume.
+- `preferences-service/server.js` is a minimal Node server (no external deps). Restart the container if you change it.
+- `go2rtc.yaml` describes each RTSP stream (see the [official documentation](https://github.com/AlexxIT/go2rtc/wiki)).
 
-## Restaurar el entorno
+## Reset the environment
 
 ```bash
 docker compose down
 rm -rf data/preferences.json
 ```
 
-Al volver a ejecutar `./launch_cameras.sh` se recreará `preferences.json` con la configuración por defecto (layout 4 cámaras, todas habilitadas).
+When you run `./launch_cameras.sh` again it recreates `preferences.json` with the default configuration (4-camera layout, all enabled).
