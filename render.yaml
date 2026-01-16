@@ -22,10 +22,6 @@ services:
     plan: free
     region: frankfurt
     dockerfilePath: ./Dockerfile.preferences
-    disk:
-      name: preferences-data
-      mountPath: /data
-      sizeGB: 1
     envVars:
       - key: PREFS_FILE
         value: /data/preferences.json
