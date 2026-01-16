@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: open-cameras-go2rtc
+    env: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile.go2rtc
+    envVars:
+      - key: GODEBUG
+        value: netdns=go
+
+  - type: web
+    name: open-cameras-web
+    env: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile.web
+
+  - type: web
+    name: open-cameras-preferences
+    env: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile.preferences
+    disk:
+      name: preferences-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: PREFS_FILE
+        value: /data/preferences.json
+      - key: PORT
+        value: "9191"

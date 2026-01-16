@@ -1,0 +1,6 @@
+FROM nginx:1.25-alpine
+
+# Copy static assets into nginx html directory
+COPY web /usr/share/nginx/html
+
+EXPOSE 80

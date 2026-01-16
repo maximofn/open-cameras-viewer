@@ -1,0 +1,7 @@
+FROM alexxit/go2rtc:latest
+
+# Copy the project go2rtc configuration into the container image so Render
+# doesn't need bind mounts.
+COPY go2rtc.yaml /config/go2rtc.yaml
+
+EXPOSE 1984 8555/tcp 8555/udp
