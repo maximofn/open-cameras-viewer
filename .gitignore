@@ -1,0 +1,24 @@
+# Credentials and config
+.env
+go2rtc.yaml
+
+# User preferences
+data/preferences.json
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Development
+.venv
+node_modules/
+.env.local
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

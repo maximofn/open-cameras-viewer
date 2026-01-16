@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cámaras</title>
+  <link rel="icon" type="image/png" href="media/camera_icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1><span>Cámaras</span></h1>
+    <div class="camera-toggles" id="camera-toggles">
+      <!-- Camera toggles will be dynamically created -->
+    </div>
+    <div class="controls">
+      <label>Layout</label>
+      <div class="select-wrapper">
+        <select id="layout-select">
+          <option value="1">1 Cámara</option>
+          <option value="2">2 Cámaras</option>
+          <option value="4" selected>4 Cámaras</option>
+          <option value="6">6 Cámaras</option>
+          <option value="7">7 Cámaras</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div id="camera-grid" class="grid layout-4">
+      <!-- Camera slots will be dynamically created -->
+    </div>
+  </main>
+
+  <div id="backdrop" class="backdrop hidden"></div>
+
+  <aside id="camera-selector" class="hidden">
+    <h3>Seleccionar cámara</h3>
+    <div id="camera-list"></div>
+    <button id="close-selector">Cerrar</button>
+  </aside>
+
+  <script src="app.js"></script>
+</body>
+</html>

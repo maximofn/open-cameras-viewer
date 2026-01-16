@@ -1,0 +1,36 @@
+# go2rtc configuration
+# Docs: https://github.com/AlexxIT/go2rtc
+#
+# IMPORTANT: Copy this file to go2rtc.yaml and update with your actual camera URLs
+# go2rtc.yaml is ignored by git to protect your credentials
+
+streams:
+  room:
+    - rtsp://username:password@192.168.1.101:554/stream1
+  door:
+    - ffmpeg:rtsp://username:password@192.168.1.102/#video=h264#audio=opus
+  bedroom_out:
+    - ffmpeg:rtsp://username:password@192.168.1.103/#video=h264#audio=opus
+  kitchen:
+    - rtsp://username:password@192.168.1.104:554/stream1
+  garage:
+    - rtsp://username:password@192.168.1.105:554/stream1
+  hall:
+    - rtsp://username:password@192.168.1.106:554/stream1
+  dining_room:
+    - rtsp://username:password@192.168.1.107:554/stream1
+  bedroom:
+    - rtsp://username:password@192.168.1.108:554/stream1
+
+# API settings
+api:
+  listen: ":1984"
+  origin: "*"
+
+# WebRTC settings
+webrtc:
+  listen: ":8555/tcp"
+  candidates:
+    - 192.168.1.100:8555  # Replace with your LAN IP
+    - 127.0.0.1:8555      # localhost for local access
+    - stun:8555
