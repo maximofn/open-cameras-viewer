@@ -1,0 +1,31 @@
+# go2rtc demo configuration for Render deployment
+# Uses public RTSP streams for demonstration purposes
+
+streams:
+  # Demo streams using public test URLs
+  # Note: These are example URLs. For a real demo, replace with actual public camera feeds
+  room:
+    - rtsp://rtsp.stream/pattern
+  door:
+    - rtsp://rtsp.stream/pattern
+  bedroom_out:
+    - rtsp://rtsp.stream/pattern
+  kitchen:
+    - rtsp://rtsp.stream/pattern
+  garage:
+    - rtsp://rtsp.stream/pattern
+  hall:
+    - rtsp://rtsp.stream/pattern
+  dining_room:
+    - rtsp://rtsp.stream/pattern
+
+# API settings
+api:
+  listen: ":1984"
+  origin: "*"
+
+# WebRTC settings for cloud deployment
+webrtc:
+  listen: ":8555/tcp"
+  candidates:
+    - stun:8555
