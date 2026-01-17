@@ -1,21 +1,21 @@
 # go2rtc demo configuration for Render deployment
 # Uses public RTSP streams for demonstration purposes
+# Note: Public RTSP streams may become unavailable over time
 
 streams:
-  # Demo streams using public test URLs
-  # Note: These are example URLs. For a real demo, replace with actual public camera feeds
+  # Public test streams and cameras
   room:
-    - rtsp://rtsp.stream/pattern
+    - rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov
   door:
-    - rtsp://rtsp.stream/pattern
+    - rtsp://170.93.143.139/rtplive/470011e600ef003a004ee33696235daa
   bedroom_out:
-    - rtsp://rtsp.stream/pattern
+    - rtsp://freja.hiof.no:1935/rtplive/_definst_/hessdalen03.stream
   kitchen:
-    - rtsp://rtsp.stream/pattern
+    - rtsp://807e9439d5ca.entrypoint.cloud.wowza.com:1935/app-rC94792j/068b9c9a_stream2
   garage:
-    - rtsp://rtsp.stream/pattern
+    - rtsp://b1.dnsdojo.com:1935/live/sys3.stream
   hall:
-    - rtsp://rtsp.stream/pattern
+    - rtsp://716f898c7b71.entrypoint.cloud.wowza.com:1935/app-8F9K44lJ/304679fe_stream2
   dining_room:
     - rtsp://rtsp.stream/pattern
 
