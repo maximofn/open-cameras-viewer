@@ -10,8 +10,12 @@ const CAMERAS = [
   // bedroom removed - camera disconnected
 ];
 
-const GO2RTC_URL = 'http://localhost:1984';
-const PREFS_API_URL = 'http://localhost:9191/preferences';
+const GO2RTC_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:1984'
+  : 'https://open-cameras-go2rtc.onrender.com';
+const PREFS_API_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:9191/preferences'
+  : 'https://open-cameras-preferences.onrender.com/preferences';
 
 // State
 let currentLayout = 4;
