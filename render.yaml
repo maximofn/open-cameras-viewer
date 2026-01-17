@@ -5,8 +5,7 @@ services:
     plan: free
     region: frankfurt
     dockerfilePath: ./Dockerfile.go2rtc
-    registryCredential:
-      name: docker-hub-pull-config-ocv
+    registryCredential: docker-hub-pull-config-ocv
     envVars:
       - key: GODEBUG
         value: netdns=go
@@ -17,8 +16,7 @@ services:
     plan: free
     region: frankfurt
     dockerfilePath: ./Dockerfile.web
-    registryCredential:
-      name: docker-hub-pull-config-ocv
+    registryCredential: docker-hub-pull-config-ocv
 
   - type: web
     name: open-cameras-preferences
@@ -26,8 +24,7 @@ services:
     plan: free
     region: frankfurt
     dockerfilePath: ./Dockerfile.preferences
-    registryCredential:
-      name: docker-hub-pull-config-ocv
+    registryCredential: docker-hub-pull-config-ocv
     envVars:
       - key: PREFS_FILE
         value: /data/preferences.json
