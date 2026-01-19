@@ -12,10 +12,10 @@ const CAMERAS = [
 
 const GO2RTC_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:1984'
-  : 'https://open-cameras-go2rtc.onrender.com';
+  : `http://${window.location.hostname}:1984`;
 const PREFS_API_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:9191/preferences'
-  : 'https://open-cameras-preferences.onrender.com/preferences';
+  : `http://${window.location.hostname}:9191/preferences`;
 
 // State
 let currentLayout = 4;

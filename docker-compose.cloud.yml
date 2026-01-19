@@ -1,0 +1,43 @@
+services:
+  go2rtc:
+    image: alexxit/go2rtc
+    container_name: cameras-go2rtc
+    restart: unless-stopped
+    ports:
+      - "1984:1984"   # API + WebUI
+      - "8555:8555/tcp"   # WebRTC TCP
+      - "8555:8555/udp"   # WebRTC UDP
+    volumes:
+      - ./go2rtc.yaml:/config/go2rtc.yaml:ro
+    environment:
+      - GODEBUG=netdns=go
+
+  web:
+    image: nginx:alpine
+    container_name: cameras-web
+    restart: unless-stopped
+    ports:
+      - "80:80"   # Changed from 9876:80 for cloud deployment
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+    depends_on:
+      - go2rtc
+      - preferences
+
+  preferences:
+    image: node:18-alpine
+    container_name: cameras-preferences
+    working_dir: /app
+    environment:
+      - PORT=9191
+      - PREFS_FILE=/data/preferences.json
+    volumes:
+      - ./preferences-service:/app:ro
+      - ./data:/data
+    command: ["node", "server.js"]
+    restart: unless-stopped
+    ports:
+      - "9191:9191"
+
+volumes:
+  go2rtc-config:

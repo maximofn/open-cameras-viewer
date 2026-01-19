@@ -1,0 +1,33 @@
+# go2rtc cloud configuration for Oracle Cloud deployment
+# Uses public RTSP streams for demonstration purposes
+# Note: Public RTSP streams may become unavailable over time
+# The setup-oracle.sh script will replace REPLACE_WITH_PUBLIC_IP with the actual public IP
+
+streams:
+  # Public test streams and cameras
+  room:
+    - rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov
+  door:
+    - rtsp://170.93.143.139/rtplive/470011e600ef003a004ee33696235daa
+  bedroom_out:
+    - rtsp://freja.hiof.no:1935/rtplive/_definst_/hessdalen03.stream
+  kitchen:
+    - rtsp://807e9439d5ca.entrypoint.cloud.wowza.com:1935/app-rC94792j/068b9c9a_stream2
+  garage:
+    - rtsp://b1.dnsdojo.com:1935/live/sys3.stream
+  hall:
+    - rtsp://716f898c7b71.entrypoint.cloud.wowza.com:1935/app-8F9K44lJ/304679fe_stream2
+  dining_room:
+    - rtsp://rtsp.stream/pattern
+
+# API settings
+api:
+  listen: ":1984"
+  origin: "*"
+
+# WebRTC settings for cloud deployment with public IP
+webrtc:
+  listen: ":8555/tcp"
+  candidates:
+    - REPLACE_WITH_PUBLIC_IP:8555
+    - stun:8555
