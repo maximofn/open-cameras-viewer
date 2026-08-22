@@ -1,0 +1,20 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY preferences-service/server.js ./server.js
+
+RUN addgroup -S app && adduser -S app -G app \
+    && mkdir -p /data \
+    && chown -R app:app /app /data
+
+USER app
+
+ENV PORT=9191
+ENV PREFS_FILE=/data/preferences.json
+
+VOLUME ["/data"]
+
+EXPOSE 9191
+
+CMD ["node", "server.js"]
